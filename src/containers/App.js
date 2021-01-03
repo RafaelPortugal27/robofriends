@@ -1,45 +1,38 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-
 import Cardlist from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
 import { robots } from '../robots';
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      robotlist: robots,
-      searchfield: '',
-    };
-  }
+const App = () => {
 
-  onSearchChange = (event) => {
-    this.setState({ searchfield: event.target.value });
-  }
+  const [robotlist, setRobotlist] = useState([]);
+  const [searchfield, setSearchfield] = useState('');
 
-  render() {
-    const { robotlist, searchfield } = this.state;
+  useEffect(() => {
+    setRobotlist(robots);
+  }, []);
 
-    const filteredRobots = robotlist.filter(robot => (
-      robot.name.toLowerCase().includes(searchfield.toLowerCase())
-    ));
+  const onSearchChange = (event) => setSearchfield(event.target.value);
 
-    return !robots.length ?
-      <h1>Loading</h1> :
-      (
-        <div className="tc container">
-          <div className="head">
-            <h1>RoboFriends</h1>
-            <SearchBox searchChange={this.onSearchChange} />
-          </div>
-          <Scroll className="robots">
-            <Cardlist robots={filteredRobots} />
-          </Scroll>
+  const filteredRobots = robotlist.filter(robot => (
+    robot.name.toLowerCase().includes(searchfield.toLowerCase())
+  ));
+
+  return !robots.length ?
+    <h1>Loading</h1> :
+    (
+      <div className="tc container">
+        <div className="head">
+          <h1>RoboFriends</h1>
+          <SearchBox searchChange={onSearchChange} />
         </div>
-      );
-  }
-}
+        <Scroll className="robots">
+          <Cardlist robots={filteredRobots} />
+        </Scroll>
+      </div>
+    );
+};
 
 export default App;
