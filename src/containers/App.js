@@ -1,38 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import './App.css';
 import Cardlist from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll';
-import { robots } from '../robots';
+import { requestRobots, setSearchfield } from '../actions';
 
-const App = () => {
+const mapStateToProps = state => ({
+  searchfield: state.searchRobots.searchfield,
+  robots: state.requestRobots.robots,
+  isPending: state.requestRobots.isPending,
+  error: state.requestRobots.error,
+});
+const mapDispatchToProps = (dispach) => ({
+  onSearchChange: (event) => dispach(setSearchfield(event.target.value)),
+  onRequestRobots: () => dispach(requestRobots()) }
+);
 
-  const [robotlist, setRobotlist] = useState([]);
-  const [searchfield, setSearchfield] = useState('');
+class App extends Component {
 
-  useEffect(() => {
-    setRobotlist(robots);
-  }, []);
+  componentDidMount() {
+    // eslint-disable-next-line react/prop-types
+    const { onRequestRobots } = this.props;
+    onRequestRobots();
+  }
 
-  const onSearchChange = (event) => setSearchfield(event.target.value);
+  render() {
+    // eslint-disable-next-line react/prop-types
+    const { searchfield, onSearchChange, robots, isPending } = this.props;
 
-  const filteredRobots = robotlist.filter(robot => (
-    robot.name.toLowerCase().includes(searchfield.toLowerCase())
-  ));
+    // eslint-disable-next-line react/prop-types
+    const filteredRobots = robots.filter(robot => (
+      // eslint-disable-next-line react/prop-types
+      robot.name.toLowerCase().includes(searchfield.toLowerCase())
+    ));
 
-  return !robots.length ?
-    <h1>Loading</h1> :
-    (
-      <div className="tc container">
-        <div className="head">
-          <h1>RoboFriends</h1>
-          <SearchBox searchChange={onSearchChange} />
+    // eslint-disable-next-line react/prop-types
+    return isPending ?
+      <h1>Loading</h1> :
+      (
+        <div className="tc container">
+          <div className="head">
+            <h1>RoboFriends</h1>
+            <SearchBox searchChange={onSearchChange} />
+          </div>
+          <Scroll className="robots">
+            <Cardlist robots={filteredRobots} />
+          </Scroll>
         </div>
-        <Scroll className="robots">
-          <Cardlist robots={filteredRobots} />
-        </Scroll>
-      </div>
-    );
-};
+      );
+  }
+}
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);
